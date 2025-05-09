@@ -3,94 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ルーレット</title>
-    <style>
-        #roulette {
-            width: 300px;
-            height: 300px;
-            border: 5px solid #000;
-            border-radius: 50%;
-            position: relative;
-            margin: 50px auto;
-            transform: rotate(0deg);
-        }
-        #pointer {
-            width: 0;
-            height: 0;
-            border-left: 20px solid transparent;
-            border-right: 20px solid transparent;
-            border-bottom: 30px solid red;
-            position: absolute;
-            top: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        .segment {
-            width: 150px;
-            height: 150px;
-            position: absolute;
-            top: 50%;
-           50%;
-            transform-origin: 0 0;
-            clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
-        }
-        .label {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform-origin: 0 0;
-            transform: translate(-50%, -50%);
-            font-size: 14px;
-            color: #fff;
-        }
-    </style>
+    <title>OpenAI Response Generator</title>
 </head>
 <body>
-    <div id="roulette">
-        <div id="pointer"></div>
-        <div class="segment" style="background-color: yellow; transform: rotate(0deg);">
-            <div class="label" style="transform: rotate(-0deg);">黄色</div>
-        </div>
-        <div class="segment" style="background-color: green; transform: rotate(60deg);">
-            <div class="label" style="transform: rotate(-60deg);">緑色</div>
-        </div>
-        <div class="segment" style="background-color: blue; transform: rotate(120deg);">
-            <div class="label" style="transform: rotate(-120deg);">青色</div>
-        </div>
-        <div class="segment" style="background-color: purple; transform: rotate(180deg);">
-            <div class="label" style="transform: rotate(-180deg);">紫色</div>
-        </div>
-        <div class="segment" style="background-color: orange; transform: rotate(240deg);">
-            <div class="label" style="transform: rotate(-240deg);">オレンジ</div>
-        </div>
-        <div class="segment" style="background-color: pink; transform: rotate(300deg);">
-            <div class="label" style="transform: rotate(-300deg);">ピンク</div>
-        </div>
-    </div>
-    <button onclick="spin()">回す</button>
-    <p id="result"></p>
+    <h1>OpenAI Response Generator</h1>
+    <textarea id="userInput" rows="4" cols="50" placeholder="Enter your prompt here..."></textarea>
+    <button onclick="generateResponse()">Generate Response</button>
+    <p id="response"></p>
 
     <script>
-        function spin() {
-            const roulette = document.getElementById('roulette');
-            const result = document.getElementById('result');
-            const randomDegree = Math.floor(Math.random() * 360);
-            roulette.style.transition = 'transform 3s ease-out';
-            roulette.style.transform = `rotate(${randomDegree}deg)`;
+        async function generateResponse() {
+            const userInput = document.getElementById('userInput').value;
+            const responseElement = document.getElementById('response');
 
-            setTimeout(() => {
-                const segments = [
-                    { name: '黄色', degree: 0 },
-                    { name: '緑色', degree: 60 },
-                    { name: '青色', degree: 120 },
-                    { name: '紫色', degree: 180 },
-                    { name: 'オレンジ', degree: 240 },
-                    { name: 'ピンク', degree: 300 }
-                ];
-                const adjustedDegree = (360 - (randomDegree % 360)) % 360;
-                const segment = segments.find(seg => adjustedDegree >= seg.degree && adjustedDegree < seg.degree + 60);
-                result.textContent = `止まった場所: ${segment.name}`;
-            }, 3000);
+            try {
+                const response = await fetch('/generate-response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ input: userInput })
+                });
+
+                const data = await response.json();
+                responseElement.textContent = data.response;
+            } catch (error) {
+                console.error('Error:', error);
+                responseElement.textContent = 'Error generating response';
+            }
         }
     </script>
 </body>
