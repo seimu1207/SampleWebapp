@@ -26,7 +26,12 @@
                     body: JSON.stringify({ input: userInput })
                 });
 
-                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const text = await response.text();
+                const data = text ? JSON.parse(text) : { response: '空のレスポンスです。' };
                 responseElement.textContent = data.response;
             } catch (error) {
                 console.error('Error:', error);
